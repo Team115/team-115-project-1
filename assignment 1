@@ -1,81 +1,29 @@
-<!doctype html>
-<!--
- *
- * Assignment 1 web app
- * 
- * Copyright (c) 2016  Monash University
- *
- * Written by Michael Wybrow
- * 
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
--->
-<html lang="en">
-<head>
-<title>Height Estimate</title>
-<meta charset="UTF-8">
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="author" content="Michael Wybrow">
-<meta name="description" content="Monash University, Australia. All rights reserved.">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-<link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.1.3/material.indigo-pink.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-<link rel="stylesheet" href="css/style.css" />
-<link rel="shortcut icon" sizes="196x196" href="surveyapp.png" />
-<link rel="apple-touch-icon-precomposed" href="surveyapp.png" />
-</head>
-<body>
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-          <header class="mdl-layout__header">
-            <div class="mdl-layout__header-row">
-              <span class="mdl-layout-title" id="header">Height Estimate</span>
-            </div>
-          </header>
+// The CameraVideoPageController is a class that controls the camera 
+// video page.  This class provides a some useful methods you will
+// need to call:
+//     cameraVideoPage.displayMessage(message, timeout):
+//         Causes a short message string to be displayed on the
+//         page for a brief period.  Useful for showing quick
+//         notifications to the user.  message is a plain string.
+//         timeout is option and denotes the length of time in msec
+//         to show the message for.
+//     cameraVideoPage.setHeadsUpDisplayHTML(html):
+//         This will set or update the heads-up-display with the
+//         text given in the html argument.  Usually this should 
+//         just be a string with text and line breaks (<br />).
 
-          <main class="mdl-layout__content" >
-              <div class="page-content" data-role="page" id="camera-page">
-                    <div id="video-container"></div>
-                    <div id="hud"></div>
-                    <div id="controls">
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" onclick="setCameraHeightValue()">Set cam height</button>
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" onclick="setBaseTiltAngle()">Set base</button>
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" onclick="setApexTiltAngle()">Set apex</button>
-                    </div>
-              </div>
-          </main>
-          <div id="toast" class="mdl-js-snackbar mdl-snackbar">
-              <div class="mdl-snackbar__text"></div>
-              <button class="mdl-snackbar__action" type="button"></button>
-          </div>
-    </div>
+// Initialise the camera video page and callback to our 
+// cameraVideoPageInitialised() function when ready.
+var cameraVideoPage = new CameraVideoPageController(
+        cameraVideoPageInitialised);
 
-	<!-- LIBRARIES / PLUGINS -->
-	<script src="https://storage.googleapis.com/code.getmdl.io/1.1.3/material.min.js"></script>
-    	<!-- SCRIPTS -->
+// You may need to create variables to store state.
     
-    
-    // Given an HTML element class and a boolean representing
-    // whether those elements should be displayed, this function
-    // hides/shows all elements with that class.
+// This function will be called when the camera video page
+// is intialised and ready to be used.
+function cameraVideoPageInitialised()
+{
+    // Step 1: Check for and intialise deviceMotion
     function displayElementsWithClass(className, display)
     {
         var elements = document.getElementsByClassName(className);
@@ -93,7 +41,54 @@
         }
     }
     
+    // ======================================================================
+    //   GPS sensor code (geolocation)
+    // ======================================================================
     
+    if (navigator.geolocation)
+    {     
+        positionOptions = {
+            enableHighAccuracy: true,
+            timeout: Infinity, 
+            maximumAge: 0
+        }; 
+
+        displayElementsWithClass("gpsError", false);
+        navigator.geolocation.watchPosition(showCurrentLocation, errorHandler, positionOptions);
+    }
+    else
+    {
+        displayElementsWithClass("gpsValue", false);
+    }
+
+    function errorHandler(error)
+    {
+        if (error.code == 1)
+        {
+           alert("Location access denied by user.");
+        }
+        else if (error.code == 2)
+        {
+           alert("Location unavailable.");
+        }
+        else if (error.code == 3)
+        {
+           alert("Location access timed out");
+        }
+        else
+        {
+           alert("Unknown error getting location.");
+        }
+    }
+
+    function showCurrentLocation(position)
+    {
+        // Demonstrate the current latitude and longitude:
+        document.getElementById("latValue").innerHTML = Number(position.coords.latitude).toFixed(4);
+        document.getElementById("longValue").innerHTML = Number(position.coords.longitude).toFixed(4);
+
+        document.getElementById("accuracyValue").innerHTML = Number(position.coords.accuracy).toFixed(2);  
+    }
 
     // ======================================================================
     //   Ambient light sensor code (devicelight)
@@ -322,10 +317,382 @@
         displayElementsWithClass("cameraError", false);
         MediaStreamTrack.getSources(gotSources);
     }
+}
     
+// This function is called by a button to set the height of phone from the
+// ground, in metres.
+function setCameraHeightValue()
+{
+    // Step 3: Set camera height
+    // check if input is a number and is positive
+    // display on screen using the displayMessage method
+    var userHeight = prompt("Please enter you height in the unit of metre")
+}
+    
+// This function is called by a button to set the angle to the base of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setBaseTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+   
+}
 
-	<script src="scripts/CameraVideoPageController.js"></script>
-	<script src="scripts/HeightEstimate.js"></script>
+// This function is called by a button to set the angle to the apex of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setApexTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+}
+
+// You may need to write several other functions.
+// The CameraVideoPageController is a class that controls the camera 
+// video page.  This class provides a some useful methods you will
+// need to call:
+//     cameraVideoPage.displayMessage(message, timeout):
+//         Causes a short message string to be displayed on the
+//         page for a brief period.  Useful for showing quick
+//         notifications to the user.  message is a plain string.
+//         timeout is option and denotes the length of time in msec
+//         to show the message for.
+//     cameraVideoPage.setHeadsUpDisplayHTML(html):
+//         This will set or update the heads-up-display with the
+//         text given in the html argument.  Usually this should 
+//         just be a string with text and line breaks (<br />).
+
+// Initialise the camera video page and callback to our 
+// cameraVideoPageInitialised() function when ready.
+var cameraVideoPage = new CameraVideoPageController(
+        cameraVideoPageInitialised);
+
+// You may need to create variables to store state.
     
-</body>
-</html>
+// This function will be called when the camera video page
+// is intialised and ready to be used.
+function cameraVideoPageInitialised()
+{
+    // Step 1: Check for and intialise deviceMotion
+    function displayElementsWithClass(className, display)
+    {
+        var elements = document.getElementsByClassName(className);
+        
+        for (var i = 0; i < elements.length; i++)
+        {
+            if (display)
+            {
+                elements[i].style.display = "block";
+            }
+            else
+            {
+                elements[i].style.display = "none";
+            }
+        }
+    }
+    
+    // ======================================================================
+    //   GPS sensor code (geolocation)
+    // ======================================================================
+    
+    if (navigator.geolocation)
+    {     
+        positionOptions = {
+            enableHighAccuracy: true,
+            timeout: Infinity, 
+            maximumAge: 0
+        }; 
+
+        displayElementsWithClass("gpsError", false);
+        navigator.geolocation.watchPosition(showCurrentLocation, errorHandler, positionOptions);
+    }
+    else
+    {
+        displayElementsWithClass("gpsValue", false);
+    }
+
+    function errorHandler(error)
+    {
+        if (error.code == 1)
+        {
+           alert("Location access denied by user.");
+        }
+        else if (error.code == 2)
+        {
+           alert("Location unavailable.");
+        }
+        else if (error.code == 3)
+        {
+           alert("Location access timed out");
+        }
+        else
+        {
+           alert("Unknown error getting location.");
+        }
+    }
+
+    function showCurrentLocation(position)
+    {
+        // Demonstrate the current latitude and longitude:
+        document.getElementById("latValue").innerHTML = Number(position.coords.latitude).toFixed(4);
+        document.getElementById("longValue").innerHTML = Number(position.coords.longitude).toFixed(4);
+
+        document.getElementById("accuracyValue").innerHTML = Number(position.coords.accuracy).toFixed(2);  
+    }
+
+    // ======================================================================
+    //   Ambient light sensor code (devicelight)
+    // ======================================================================
+    
+    function deviceLightUpdate(e)
+    {
+        // Get the ambient light level in lux.
+        var lightLevel = event.value;
+        document.getElementById("light").innerHTML = Number(lightLevel).toFixed(2);     
+    }
+    
+    if (window.DeviceLightEvent)
+    {
+        displayElementsWithClass("lightError", false);
+        window.addEventListener('devicelight', deviceLightUpdate);
+    }
+    else
+    {
+        displayElementsWithClass("lightValue", false);
+    }
+
+    // ======================================================================
+    //   Orientation/compass sensor code (deviceOrientation)
+    // ======================================================================    
+
+    var degtorad = Math.PI / 180; // Degree-to-Radian conversion
+    var radtodeg = 180 / Math.PI; // Radian-to-Degree conversion
+
+    // From W3C DeviceOrientation Event specification: 
+    // http://w3c.github.io/deviceorientation/spec-source-orientation.html
+    function compassHeading( alpha, beta, gamma )
+    {
+        var _x = beta  ? beta  * degtorad : 0; // beta value
+        var _y = gamma ? gamma * degtorad : 0; // gamma value
+        var _z = alpha ? alpha * degtorad : 0; // alpha value
+
+        var cX = Math.cos( _x );
+        var cY = Math.cos( _y );
+        var cZ = Math.cos( _z );
+        var sX = Math.sin( _x );
+        var sY = Math.sin( _y );
+        var sZ = Math.sin( _z );
+
+        // Calculate Vx and Vy components
+        var Vx = - cZ * sY - sZ * sX * cY;
+        var Vy = - sZ * sY + cZ * sX * cY;
+
+        // Calculate compass heading
+        var compassHeading = Math.atan( Vx / Vy );
+
+        // Convert compass heading to use whole unit circle
+        if( Vy < 0 )
+        {
+            compassHeading += Math.PI;
+        }
+        else if( Vx < 0 )
+        {
+            compassHeading += 2 * Math.PI;
+        }
+
+        return compassHeading * ( 180 / Math.PI ); // Compass Heading (in degrees)
+    }
+
+    function deviceOrientationUpdate(e)
+    {
+        if(e.gamma==null && e.beta==null && e.alpha==null)
+        {
+            displayElementsWithClass("compassValue", false);
+            displayElementsWithClass("webkitCompassValue", false);
+            displayElementsWithClass("compassError", true);
+            return;
+        }
+        displayElementsWithClass("compassValue", true);
+        displayElementsWithClass("compassError", false);
+
+        if (e.absolute)
+        {
+            var heading = compassHeading(e.alpha, e.beta, e.gamma);
+            document.getElementById("headingValue").innerHTML = Number(heading).toFixed(2);
+        }
+        else
+        {
+            document.getElementById("headingValue").innerHTML = "???";
+        }
+        
+        document.getElementById("alphaValue").innerHTML = Number(e.alpha).toFixed(2);
+        document.getElementById("betaValue").innerHTML = Number(e.beta).toFixed(2);
+        document.getElementById("gammaValue").innerHTML = Number(e.gamma).toFixed(2);
+        document.getElementById("absoluteValue").innerHTML = String(e.absolute);
+        
+        if (e.webkitCompassHeading != undefined)
+        {
+            displayElementsWithClass("webkitCompassValue", true);
+            document.getElementById("webkitHeadingValue").innerHTML = Number(e.webkitCompassHeading).toFixed(2);
+            document.getElementById("webkitAccuracyValue").innerHTML = Number(e.webkitCompassAccuracy).toFixed(2);
+        }
+        else
+        {
+            displayElementsWithClass("webkitCompassValue", false);
+        }
+    }
+
+    if (window.DeviceOrientationEvent) 
+    {
+        displayElementsWithClass("compassError", false);
+        window.addEventListener('deviceorientation', deviceOrientationUpdate);
+    }
+    else
+    {
+        displayElementsWithClass("compassValue", false);
+    }
+
+    // ======================================================================
+    //   Accelerometer sensor code (deviceMotion)
+    // ======================================================================    
+
+    function deviceMotionUpdate(e)
+    {
+        var aX = e.accelerationIncludingGravity.x;
+        var aY = e.accelerationIncludingGravity.y;
+        var aZ = e.accelerationIncludingGravity.z;
+    
+        var gX = aX / 9.8;
+        var gY = aY / 9.8;
+        var gZ = aZ / 9.8;
+           
+        // Pitch and Roll calculations, based on:
+        // http://developer.nokia.com/community/wiki/
+        //  How_to_get_pitch_and_roll_from_accelerometer_data_on_Windows_Phone
+        var pitch = Math.atan(-gY / gZ);
+        var roll = Math.atan(gX / Math.sqrt(Math.pow(gY,2) + Math.pow(gZ,2)));
+        
+        pitch *= radtodeg;
+        roll *= radtodeg;
+
+        document.getElementById("gX").innerHTML = Number(gX).toFixed(2);
+        document.getElementById("gY").innerHTML = Number(gY).toFixed(2);
+        document.getElementById("gZ").innerHTML = Number(gZ).toFixed(2);
+   
+        document.getElementById("rotAlphaValue").innerHTML = Number(e.rotationRate.alpha).toFixed(2);
+        document.getElementById("rotBetaValue").innerHTML = Number(e.rotationRate.beta).toFixed(2);
+        document.getElementById("rotGammaValue").innerHTML = Number(e.rotationRate.gamma).toFixed(2);
+        
+        document.getElementById("pitch").innerHTML = Number(pitch).toFixed(1);
+        document.getElementById("roll").innerHTML = Number(roll).toFixed(1);     
+    }
+    
+ 
+    if (window.DeviceMotionEvent)
+    {
+        displayElementsWithClass("accelerometerError", false);
+        window.addEventListener("devicemotion", deviceMotionUpdate);
+    }
+    else
+    {
+        displayElementsWithClass("accelerometerValue", false);
+    }
+
+    // ======================================================================
+    //   Back camera sensor code (userMedia)
+    // ======================================================================    
+
+    var videoElement = document.querySelector("video");
+        
+    function successCallback(stream)
+    {
+        window.stream = stream; // make stream available to console
+        videoElement.src = window.URL.createObjectURL(stream);
+        videoElement.play();
+    }
+
+    function errorCallback(error)
+    {
+        console.log("navigator.getUserMedia error: ", error);
+    }
+
+    // Support different browsers
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+    function sourceSelected(videoSource)
+    {
+        if (!!window.stream)
+        {
+            videoElement.src = null;
+            window.stream.stop();
+        }
+
+        var constraints = {
+            video: {
+                optional: [{sourceId: videoSource}]
+            },
+            audio: false
+        };
+
+        navigator.getUserMedia(constraints, successCallback, errorCallback);
+    }
+   
+    
+    function gotSources(sourceInfos)
+    {
+        var videoSource = null;
+
+        for (var i = 0; i != sourceInfos.length; ++i)
+        {
+            var sourceInfo = sourceInfos[i];
+            if (sourceInfo.kind === 'video')
+            {
+                videoSource = sourceInfo.id;
+            }
+            else
+            {
+                console.log('Some other kind of source: ', sourceInfo);
+            }    
+        }
+
+        sourceSelected(videoSource);
+    }
+
+    if (typeof MediaStreamTrack === 'undefined')
+    {
+        displayElementsWithClass("cameraValue", false);
+    } 
+    else 
+    {
+        displayElementsWithClass("cameraError", false);
+        MediaStreamTrack.getSources(gotSources);
+    }
+}
+    
+// This function is called by a button to set the height of phone from the
+// ground, in metres.
+function setCameraHeightValue()
+{
+    // Step 3: Set camera height
+    // check if input is a number and is positive
+    // display on screen using the displayMessage method
+    var userHeight = prompt("Please enter you height in the unit of metre")
+}
+    
+// This function is called by a button to set the angle to the base of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setBaseTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+   
+}
+
+// This function is called by a button to set the angle to the apex of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setApexTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+}
+
+// You may need to write several other functions.
