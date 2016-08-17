@@ -21,303 +21,23 @@ var cameraVideoPage = new CameraVideoPageController(
     
 // This function will be called when the camera video page
 // is intialised and ready to be used.
-function cameraVideoPageInitialised()
+function cameraVideoPageInitialised(event)
 {
     // Step 1: Check for and intialise deviceMotion
-    function displayElementsWithClass(className, display)
-    {
-        var elements = document.getElementsByClassName(className);
-        
-        for (var i = 0; i < elements.length; i++)
-        {
-            if (display)
-            {
-                elements[i].style.display = "block";
-            }
-            else
-            {
-                elements[i].style.display = "none";
-            }
-        }
-    }
+    var absolute = event.absolute;
+    var axisX = event.beta;
+    var axisY = event.gamma;
     
-    // ======================================================================
-    //   GPS sensor code (geolocation)
-    // ======================================================================
+    hud.innerHTML = "beta :" + axisX + "\n" + "<br />";
+    hud.innerHTML += "gamma :" + axisY + "\n" + "<br />";
+    hud.innerHTML += "absolute :" + absolute + "\n" + "<br />";
     
-    if (navigator.geolocation)
-    {     
-        positionOptions = {
-            enableHighAccuracy: true,
-            timeout: Infinity, 
-            maximumAge: 0
-        }; 
-
-        displayElementsWithClass("gpsError", false);
-        navigator.geolocation.watchPosition(showCurrentLocation, errorHandler, positionOptions);
-    }
-    else
-    {
-        displayElementsWithClass("gpsValue", false);
-    }
-
-    function errorHandler(error)
-    {
-        if (error.code == 1)
-        {
-           alert("Location access denied by user.");
-        }
-        else if (error.code == 2)
-        {
-           alert("Location unavailable.");
-        }
-        else if (error.code == 3)
-        {
-           alert("Location access timed out");
-        }
-        else
-        {
-           alert("Unknown error getting location.");
-        }
-    }
-
-    function showCurrentLocation(position)
-    {
-        // Demonstrate the current latitude and longitude:
-        document.getElementById("latValue").innerHTML = Number(position.coords.latitude).toFixed(4);
-        document.getElementById("longValue").innerHTML = Number(position.coords.longitude).toFixed(4);
-
-        document.getElementById("accuracyValue").innerHTML = Number(position.coords.accuracy).toFixed(2);  
-    }
-
-    // ======================================================================
-    //   Ambient light sensor code (devicelight)
-    // ======================================================================
-    
-    function deviceLightUpdate(e)
-    {
-        // Get the ambient light level in lux.
-        var lightLevel = event.value;
-        document.getElementById("light").innerHTML = Number(lightLevel).toFixed(2);     
-    }
-    
-    if (window.DeviceLightEvent)
-    {
-        displayElementsWithClass("lightError", false);
-        window.addEventListener('devicelight', deviceLightUpdate);
-    }
-    else
-    {
-        displayElementsWithClass("lightValue", false);
-    }
-
-    // ======================================================================
-    //   Orientation/compass sensor code (deviceOrientation)
-    // ======================================================================    
-
-    var degtorad = Math.PI / 180; // Degree-to-Radian conversion
-    var radtodeg = 180 / Math.PI; // Radian-to-Degree conversion
-
-    // From W3C DeviceOrientation Event specification: 
-    // http://w3c.github.io/deviceorientation/spec-source-orientation.html
-    function compassHeading( alpha, beta, gamma )
-    {
-        var _x = beta  ? beta  * degtorad : 0; // beta value
-        var _y = gamma ? gamma * degtorad : 0; // gamma value
-        var _z = alpha ? alpha * degtorad : 0; // alpha value
-
-        var cX = Math.cos( _x );
-        var cY = Math.cos( _y );
-        var cZ = Math.cos( _z );
-        var sX = Math.sin( _x );
-        var sY = Math.sin( _y );
-        var sZ = Math.sin( _z );
-
-        // Calculate Vx and Vy components
-        var Vx = - cZ * sY - sZ * sX * cY;
-        var Vy = - sZ * sY + cZ * sX * cY;
-
-        // Calculate compass heading
-        var compassHeading = Math.atan( Vx / Vy );
-
-        // Convert compass heading to use whole unit circle
-        if( Vy < 0 )
-        {
-            compassHeading += Math.PI;
-        }
-        else if( Vx < 0 )
-        {
-            compassHeading += 2 * Math.PI;
-        }
-
-        return compassHeading * ( 180 / Math.PI ); // Compass Heading (in degrees)
-    }
-
-    function deviceOrientationUpdate(e)
-    {
-        if(e.gamma==null && e.beta==null && e.alpha==null)
-        {
-            displayElementsWithClass("compassValue", false);
-            displayElementsWithClass("webkitCompassValue", false);
-            displayElementsWithClass("compassError", true);
-            return;
-        }
-        displayElementsWithClass("compassValue", true);
-        displayElementsWithClass("compassError", false);
-
-        if (e.absolute)
-        {
-            var heading = compassHeading(e.alpha, e.beta, e.gamma);
-            document.getElementById("headingValue").innerHTML = Number(heading).toFixed(2);
-        }
-        else
-        {
-            document.getElementById("headingValue").innerHTML = "???";
-        }
-        
-        document.getElementById("alphaValue").innerHTML = Number(e.alpha).toFixed(2);
-        document.getElementById("betaValue").innerHTML = Number(e.beta).toFixed(2);
-        document.getElementById("gammaValue").innerHTML = Number(e.gamma).toFixed(2);
-        document.getElementById("absoluteValue").innerHTML = String(e.absolute);
-        
-        if (e.webkitCompassHeading != undefined)
-        {
-            displayElementsWithClass("webkitCompassValue", true);
-            document.getElementById("webkitHeadingValue").innerHTML = Number(e.webkitCompassHeading).toFixed(2);
-            document.getElementById("webkitAccuracyValue").innerHTML = Number(e.webkitCompassAccuracy).toFixed(2);
-        }
-        else
-        {
-            displayElementsWithClass("webkitCompassValue", false);
-        }
-    }
-
-    if (window.DeviceOrientationEvent) 
-    {
-        displayElementsWithClass("compassError", false);
-        window.addEventListener('deviceorientation', deviceOrientationUpdate);
-    }
-    else
-    {
-        displayElementsWithClass("compassValue", false);
-    }
-
-    // ======================================================================
-    //   Accelerometer sensor code (deviceMotion)
-    // ======================================================================    
-
-    function deviceMotionUpdate(e)
-    {
-        var aX = e.accelerationIncludingGravity.x;
-        var aY = e.accelerationIncludingGravity.y;
-        var aZ = e.accelerationIncludingGravity.z;
-    
-        var gX = aX / 9.8;
-        var gY = aY / 9.8;
-        var gZ = aZ / 9.8;
-           
-        // Pitch and Roll calculations, based on:
-        // http://developer.nokia.com/community/wiki/
-        //  How_to_get_pitch_and_roll_from_accelerometer_data_on_Windows_Phone
-        var pitch = Math.atan(-gY / gZ);
-        var roll = Math.atan(gX / Math.sqrt(Math.pow(gY,2) + Math.pow(gZ,2)));
-        
-        pitch *= radtodeg;
-        roll *= radtodeg;
-
-        document.getElementById("gX").innerHTML = Number(gX).toFixed(2);
-        document.getElementById("gY").innerHTML = Number(gY).toFixed(2);
-        document.getElementById("gZ").innerHTML = Number(gZ).toFixed(2);
    
-        document.getElementById("rotAlphaValue").innerHTML = Number(e.rotationRate.alpha).toFixed(2);
-        document.getElementById("rotBetaValue").innerHTML = Number(e.rotationRate.beta).toFixed(2);
-        document.getElementById("rotGammaValue").innerHTML = Number(e.rotationRate.gamma).toFixed(2);
-        
-        document.getElementById("pitch").innerHTML = Number(pitch).toFixed(1);
-        document.getElementById("roll").innerHTML = Number(roll).toFixed(1);     
-    }
-    
- 
-    if (window.DeviceMotionEvent)
-    {
-        displayElementsWithClass("accelerometerError", false);
-        window.addEventListener("devicemotion", deviceMotionUpdate);
-    }
-    else
-    {
-        displayElementsWithClass("accelerometerValue", false);
-    }
-
-    // ======================================================================
-    //   Back camera sensor code (userMedia)
-    // ======================================================================    
-
-    var videoElement = document.querySelector("video");
-        
-    function successCallback(stream)
-    {
-        window.stream = stream; // make stream available to console
-        videoElement.src = window.URL.createObjectURL(stream);
-        videoElement.play();
-    }
-
-    function errorCallback(error)
-    {
-        console.log("navigator.getUserMedia error: ", error);
-    }
-
-    // Support different browsers
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
-    function sourceSelected(videoSource)
-    {
-        if (!!window.stream)
-        {
-            videoElement.src = null;
-            window.stream.stop();
-        }
-
-        var constraints = {
-            video: {
-                optional: [{sourceId: videoSource}]
-            },
-            audio: false
-        };
-
-        navigator.getUserMedia(constraints, successCallback, errorCallback);
-    }
-   
-    
-    function gotSources(sourceInfos)
-    {
-        var videoSource = null;
-
-        for (var i = 0; i != sourceInfos.length; ++i)
-        {
-            var sourceInfo = sourceInfos[i];
-            if (sourceInfo.kind === 'video')
-            {
-                videoSource = sourceInfo.id;
-            }
-            else
-            {
-                console.log('Some other kind of source: ', sourceInfo);
-            }    
-        }
-
-        sourceSelected(videoSource);
-    }
-
-    if (typeof MediaStreamTrack === 'undefined')
-    {
-        displayElementsWithClass("cameraValue", false);
-    } 
-    else 
-    {
-        displayElementsWithClass("cameraError", false);
-        MediaStreamTrack.getSources(gotSources);
-    }
 }
+window.addEventListener('deviceorientation',cameraVideoPageInitialised);
+
+
+
     
 // This function is called by a button to set the height of phone from the
 // ground, in metres.
@@ -326,8 +46,16 @@ function setCameraHeightValue()
     // Step 3: Set camera height
     // check if input is a number and is positive
     // display on screen using the displayMessage method
-    var userHeight = prompt("Please enter you height in the unit of metre")
+    var userInputHeight = prompt("Please enter your estimated camera height");
+    while (isNaN(userInputHeight) || userInputHeight <=0 )
+        {
+            alert("Your entry is not a not number or it is a negative value");
+            userInputHeight = prompt("Please enter your estimated camera height");
+        }
+    return userInputHeight;
 }
+
+
     
 // This function is called by a button to set the angle to the base of
 // the object being measured.  It uses the current smoothed tilt angle.
@@ -347,3 +75,5 @@ function setApexTiltAngle()
 }
 
 // You may need to write several other functions.
+
+ 
