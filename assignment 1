@@ -12,8 +12,17 @@
 //         text given in the html argument.  Usually this should 
 //         just be a string with text and line breaks (<br />).
 
+ // Given an HTML element class and a boolean representing
+    // whether those elements should be displayed, this function
+    // hides/shows all elements with that class.
+    // ======================================================================
+    //   Orientation/compass sensor code (deviceOrientation)
+    // ======================================================================    
+
+
 // Initialise the camera video page and callback to our 
 // cameraVideoPageInitialised() function when ready.
+var axisX, axisY, axisZ, absoulute, userInputHeight;
 var cameraVideoPage = new CameraVideoPageController(
         cameraVideoPageInitialised);
 
@@ -21,22 +30,18 @@ var cameraVideoPage = new CameraVideoPageController(
     
 // This function will be called when the camera video page
 // is intialised and ready to be used.
-function cameraVideoPageInitialised(event)
+    function cameraVideoPageInitialised(event)
 {
     // Step 1: Check for and intialise deviceMotion
-    var absolute = event.absolute;
-    var axisX = event.beta;
-    var axisY = event.gamma;
+	 axisX = event.alpha;
+     axisY = event.beta;
+     axisZ = event.gamma;
+	 absolute = event.absolute;
+
+   cameraVideoPage.setHeadsUpDisplayHTML("alpha :" + axisX + "\n" + "<br />"+"beta :" + axisY + "\n" + "<br />"+"gamma :" + axisZ + "\n" + "<br />"+"absolute :" + absolute + "\n" + "<br />");
     
-    hud.innerHTML = "beta :" + axisX + "\n" + "<br />";
-    hud.innerHTML += "gamma :" + axisY + "\n" + "<br />";
-    hud.innerHTML += "absolute :" + absolute + "\n" + "<br />";
-    
-   
 }
 window.addEventListener('deviceorientation',cameraVideoPageInitialised);
-
-
 
     
 // This function is called by a button to set the height of phone from the
@@ -46,15 +51,18 @@ function setCameraHeightValue()
     // Step 3: Set camera height
     // check if input is a number and is positive
     // display on screen using the displayMessage method
-    var userInputHeight = prompt("Please enter your estimated camera height");
+    userInputHeight = prompt("Please enter your estimated camera height");
+    if (userInputHeight != null)
+        {
     while (isNaN(userInputHeight) || userInputHeight <=0 )
         {
             alert("Your entry is not a not number or it is a negative value");
             userInputHeight = prompt("Please enter your estimated camera height");
         }
     return userInputHeight;
+        }
+cameraVideoPage.displayMessage("Estimated Camera height recorded", 1000)
 }
-
 
     
 // This function is called by a button to set the angle to the base of
@@ -63,7 +71,8 @@ function setBaseTiltAngle()
 {
     // Step 4: Record tilt angle 
     // display on screen using the displayMessage method
-   
+ BaseTiltAngle = axisY;
+ cameraVideoPage.displayMessage("Base Tilt Angle recorded", 1000)   
 }
 
 // This function is called by a button to set the angle to the apex of
@@ -72,8 +81,12 @@ function setApexTiltAngle()
 {
     // Step 4: Record tilt angle 
     // display on screen using the displayMessage method
+ApexTiltAngle = axisY;
+cameraVideoPage.displayMessage("Apex Tilt Angle recorded", 1000)
 }
 
 // You may need to write several other functions.
+    
+   
 
  
