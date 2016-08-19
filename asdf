@@ -1,0 +1,67 @@
+function setCameraHeightValue()
+{
+    // Step 3: Set camera height
+    // check if input is a number and is positive
+    // display on screen using the displayMessage method
+    userInputHeight = prompt("Please enter your estimated camera height (meter)");
+    if (userInputHeight != null)
+        {
+    while (isNaN(userInputHeight) || userInputHeight <=0 )
+        {
+            alert("Your entry is not a number or it is a negative value");
+            userInputHeight = prompt("Please enter your estimated camera height");
+        }
+    return userInputHeight;
+        }
+cameraVideoPage.displayMessage("Estimated Camera height recorded", 1000)
+}
+
+    
+// This function is called by a button to set the angle to the base of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setBaseTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+ return axisY;
+ cameraVideoPage.displayMessage("Base Tilt Angle recorded", 1000)   
+}
+
+// This function is called by a button to set the angle to the apex of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setApexTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+return axisY;
+cameraVideoPage.displayMessage("Apex Tilt Angle recorded", 1000)
+}
+
+// You may need to write several other functions.
+
+// This function is used to calculate the estimated distance to the object
+function estimatedDistance()
+{
+    // convert from degree to radian
+    var convertRadian1 = Math.abs(setBaseTiltAngle()) * Math.PI / 100;
+    // calculate distance to the object
+    var distance = Math.tan(convertRadian1) * setCameraHeightValue();
+    cameraVideoPage.displayMessage("Distance: " + distance + "m", 1000)
+    return distance;
+}
+
+// This function is used to calculate the total estimated height of object
+function estimatedHeight()
+{
+    //This function is used to calculate the height difference from
+    //the device to Apex of object
+    function upperHeight()
+    {
+        // convert from degree to radian
+        var convertRadian2 = Math.abs(setApexTiltAngle()) * Math.PI / 100;
+        // calculate the height difference
+        var result = Math.tan(convertRadian2) * estimatedDistance();
+        return result;
+    }
+    return upperHeight()+setCameraHeightValue();
+}
