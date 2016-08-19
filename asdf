@@ -1,7 +1,7 @@
 // This function is called by a button to set the height of phone from the
 // ground, in metres.
 
-var heightDifference = setCameraHeightValue();
+var heightDifference = parseInt(setCameraHeightValue());
 
 function setCameraHeightValue()
 {
@@ -69,5 +69,9 @@ function estimatedHeight()
         return result;
     }
     var totalHeight =  upperHeight()+heightDifference;
-    return totalHeight.toFixed(2)
+    var result = totalHeight.toFixed(2);
+    return result;
 }
+
+// Final result
+var finalHeight = estimatedHeight();
