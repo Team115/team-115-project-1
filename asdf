@@ -63,5 +63,6 @@ function estimatedHeight()
         var result = Math.tan(convertRadian2) * estimatedDistance();
         return result;
     }
-    return upperHeight()+setCameraHeightValue();
+    var totalHeight =  upperHeight()+setCameraHeightValue();
+    return totalHeight.toFixed(2)
 }
