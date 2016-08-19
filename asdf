@@ -51,7 +51,6 @@ function estimatedDistance()
     var convertRadian1 = Math.abs(setBaseTiltAngle()) * Math.PI / 100;
     // calculate distance to the object
     var distance = Math.tan(convertRadian1) * heightDifference;
-    cameraVideoPage.displayMessage("Distance: " + distance + "m", 1000);
     return distance;
 }
 
