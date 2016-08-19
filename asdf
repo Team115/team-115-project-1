@@ -1,8 +1,6 @@
 // This function is called by a button to set the height of phone from the
 // ground, in metres.
 
-var heightDifference = parseInt(setCameraHeightValue());
-
 function setCameraHeightValue()
 {
     // Step 3: Set camera height
@@ -11,14 +9,14 @@ function setCameraHeightValue()
     userInputHeight = prompt("Please enter your estimated camera height (meter)");
     if (userInputHeight != null)
         {
-    while (isNaN(userInputHeight) || userInputHeight <=0 )
-        {
-            alert("Your entry is not a number or it is a negative value");
-            userInputHeight = prompt("Please enter your estimated camera height");
+            while (isNaN(userInputHeight) || userInputHeight <=0 )
+            {
+                alert("Your entry is not a number or it is a negative value");
+                userInputHeight = prompt("Please enter your estimated camera height");
+            }
         }
+    cameraVideoPage.displayMessage("Estimated Camera height: " + userInputHeight + "m", 1000);
     return userInputHeight;
-        }
-cameraVideoPage.displayMessage("Estimated Camera height recorded", 1000);
 }
 
     
@@ -28,8 +26,11 @@ function setBaseTiltAngle()
 {
     // Step 4: Record tilt angle 
     // display on screen using the displayMessage method
- return axisY;
- cameraVideoPage.displayMessage("Base Tilt Angle recorded", 1000);
+    var result = axisY;
+    cameraVideoPage.displayMessage("Base Tilt Angle: " + result, 1000);
+    cameraVideoPage.displayMessage("Estimated distance: " + estimatedDistance() + "m", 1000);
+    return result;
+    
 }
 
 // This function is called by a button to set the angle to the apex of
@@ -38,8 +39,9 @@ function setApexTiltAngle()
 {
     // Step 4: Record tilt angle 
     // display on screen using the displayMessage method
-return axisY;
-cameraVideoPage.displayMessage("Apex Tilt Angle recorded", 1000);
+    var result = axisY;
+    cameraVideoPage.displayMessage("Apex Tilt Angle: " + result, 1000);
+    return result;    
 }
 
 // You may need to write several other functions.
@@ -50,7 +52,7 @@ function estimatedDistance()
     // convert from degree to radian
     var convertRadian1 = Math.abs(setBaseTiltAngle()) * Math.PI / 100;
     // calculate distance to the object
-    var distance = Math.tan(convertRadian1) * heightDifference;
+    var distance = Math.tan(convertRadian1) * setCameraHeightValue();
     return distance;
 }
 
@@ -67,10 +69,7 @@ function estimatedHeight()
         var result = Math.tan(convertRadian2) * estimatedDistance();
         return result;
     }
-    var totalHeight =  upperHeight()+heightDifference;
+    var totalHeight =  upperHeight()+setCameraHeightValue();
     var result = totalHeight.toFixed(2);
     return result;
 }
-
-// Final result
-var finalHeight = estimatedHeight();
