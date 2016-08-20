@@ -78,15 +78,12 @@ function setBaseTiltAngle()
     var convertRadian1 = BaseTiltAngle * Math.PI / 180;
     // calculate distance to the object
     distance = Math.tan(convertRadian1) * userInputHeight;
-    //return distance;
+    //return convertRadian1;
     cameraVideoPage.setHeadsUpDisplayHTML("Estimated Distance : " + distance + "m");
+    return BaseTiltAngle;
 }
 
 //console.log(BaseTiltAngle)
-
-
-
-
 
 // This function is called by a button to set the angle to the apex of
 // the object being measured.  It uses the current smoothed tilt angle.
@@ -101,7 +98,8 @@ function setApexTiltAngle()
         var convertRadian2 = actualApexAngle * Math.PI / 180;
         // calculate the height difference
         var partialHeight = Math.tan(convertRadian2) * distance;
-        var totalHeight =  partialHeight + userInputHeight;
+        var bottomHeight = Math.tan(convertRadian1)*distance;
+        var totalHeight =  partialHeight + bottomHeight;
         
    cameraVideoPage.setHeadsUpDisplayHTML("Estimated Height :" + totalHeight + "m");
 }
