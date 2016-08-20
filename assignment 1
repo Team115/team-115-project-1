@@ -22,7 +22,7 @@
 
 // Initialise the camera video page and callback to our 
 // cameraVideoPageInitialised() function when ready.
-var axisX, axisY, axisZ, absoulute, userInputHeight;
+var axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "";
 var cameraVideoPage = new CameraVideoPageController(
         cameraVideoPageInitialised);
 
@@ -51,7 +51,7 @@ function setCameraHeightValue()
     // Step 3: Set camera height
     // check if input is a number and is positive
     // display on screen using the displayMessage method
-    userInputHeight = prompt("Please enter your estimated camera height");
+    userInputHeight = prompt("Please enter your estimated camera height in the unit of metre");
     if (userInputHeight != null)
         {
     while (isNaN(userInputHeight) || userInputHeight <=0 )
@@ -59,9 +59,9 @@ function setCameraHeightValue()
             alert("Your entry is not a not number or it is a negative value");
             userInputHeight = prompt("Please enter your estimated camera height");
         }
-    return userInputHeight;
         }
-cameraVideoPage.displayMessage("Estimated Camera height recorded", 1000)
+cameraVideoPage.displayMessage("Estimated Camera height recorded : " + userInputHeight + "m", 2000)
+return userInputHeight;
 }
 
     
@@ -71,9 +71,22 @@ function setBaseTiltAngle()
 {
     // Step 4: Record tilt angle 
     // display on screen using the displayMessage method
- BaseTiltAngle = axisY;
- cameraVideoPage.displayMessage("Base Tilt Angle recorded", 1000)   
+    BaseTiltAngle = axisY;
+    cameraVideoPage.displayMessage("Base Tilt Angle recorded:" + BaseTiltAngle, 2000)   
+    //return BaseTiltAngle;
+    // convert from degree to radian
+    var convertRadian1 = BaseTiltAngle * Math.PI / 180;
+    // calculate distance to the object
+    distance = Math.tan(convertRadian1) * userInputHeight;
+    //return distance;
+    cameraVideoPage.setHeadsUpDisplayHTML("Estimated Distance : " + distance + "m");
 }
+
+//console.log(BaseTiltAngle)
+
+
+
+
 
 // This function is called by a button to set the angle to the apex of
 // the object being measured.  It uses the current smoothed tilt angle.
@@ -81,12 +94,19 @@ function setApexTiltAngle()
 {
     // Step 4: Record tilt angle 
     // display on screen using the displayMessage method
-ApexTiltAngle = axisY;
-cameraVideoPage.displayMessage("Apex Tilt Angle recorded", 1000)
+    ApexTiltAngle = axisY;
+    var actualApexAngle = ApexTiltAngle - 90;
+    cameraVideoPage.displayMessage("Apex Tilt Angle recorded:" + actualApexAngle, 2000)
+     // convert from degree to radian
+        var convertRadian2 = actualApexAngle * Math.PI / 180;
+        // calculate the height difference
+        var partialHeight = Math.tan(convertRadian2) * distance;
+        var totalHeight =  partialHeight + userInputHeight;
+        
+   cameraVideoPage.setHeadsUpDisplayHTML("Estimated Height :" + totalHeight + "m");
 }
 
 // You may need to write several other functions.
-    
    
 
  
