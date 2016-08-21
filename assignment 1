@@ -22,7 +22,7 @@
 
 // Initialise the camera video page and callback to our 
 // cameraVideoPageInitialised() function when ready.
-var axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "";
+var alph,bet,gam,axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "";
 var cameraVideoPage = new CameraVideoPageController(cameraVideoPageInitialised);
 
 // You may need to create variables to store state.
@@ -32,9 +32,12 @@ var cameraVideoPage = new CameraVideoPageController(cameraVideoPageInitialised);
     function cameraVideoPageInitialised(event)
 {
     // Step 1: Check for and intialise deviceMotion
-	 axisX = event.alpha;
-     axisY = event.beta;
-     axisZ = event.gamma;
+	 alph = event.alpha;
+     bet = event.beta;
+     gam = event.gamma;
+	axisX = alph.toFixed(2);
+	axisY = bet.toFixed(2);
+	axisZ = gam.toFixed(2);
 	 absolute = event.absolute;
 
    cameraVideoPage.setHeadsUpDisplayHTML("alpha :" + axisX + "\n" + "<br />"+"beta :" + axisY + "\n" + "<br />"+"gamma :" + axisZ + "\n" + "<br />"+"absolute :" + absolute + "\n" + "<br />");
@@ -60,6 +63,7 @@ function setCameraHeightValue()
         }
         }
 cameraVideoPage.displayMessage("Estimated Camera height recorded : " + userInputHeight + "m", 2000)
+return userInputHeight;
 }
 
     
@@ -94,9 +98,12 @@ function setApexTiltAngle()
     cameraVideoPage.displayMessage("Apex Tilt Angle recorded:" + actualApexAngle, 2000)
      // convert from degree to radian
         var convertRadian2 = actualApexAngle * Math.PI / 180;
+	    var convertRadian1 = BaseTiltAngle * Math.PI / 180;
+		distance = Math.tan(convertRadian1) * userInputHeight;
         // calculate the height difference
         var partialHeight = Math.tan(convertRadian2) * distance;
-        var totalHeight =  partialHeight;
+        var bottomHeight = Math.tan(convertRadian1) * distance;
+        var totalHeight =  partialHeight + bottomHeight;
         
    cameraVideoPage.setHeadsUpDisplayHTML("Estimated Height :" + totalHeight + "m");
 }
