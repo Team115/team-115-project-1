@@ -23,8 +23,7 @@
 // Initialise the camera video page and callback to our 
 // cameraVideoPageInitialised() function when ready.
 var axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "";
-var cameraVideoPage = new CameraVideoPageController(
-        cameraVideoPageInitialised);
+var cameraVideoPage = new CameraVideoPageController(cameraVideoPageInitialised);
 
 // You may need to create variables to store state.
     
@@ -61,7 +60,6 @@ function setCameraHeightValue()
         }
         }
 cameraVideoPage.displayMessage("Estimated Camera height recorded : " + userInputHeight + "m", 2000)
-return userInputHeight;
 }
 
     
@@ -98,8 +96,7 @@ function setApexTiltAngle()
         var convertRadian2 = actualApexAngle * Math.PI / 180;
         // calculate the height difference
         var partialHeight = Math.tan(convertRadian2) * distance;
-        var bottomHeight = Math.tan(convertRadian1)*distance;
-        var totalHeight =  partialHeight + bottomHeight;
+        var totalHeight =  partialHeight;
         
    cameraVideoPage.setHeadsUpDisplayHTML("Estimated Height :" + totalHeight + "m");
 }
