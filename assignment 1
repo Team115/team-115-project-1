@@ -22,8 +22,10 @@
 
 // Initialise the camera video page and callback to our 
 // cameraVideoPageInitialised() function when ready.
-var alph,bet,gam,axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "";
-var cameraVideoPage = new CameraVideoPageController(cameraVideoPageInitialised);
+var axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "", partialHeight = "", totalHeight="";
+
+var cameraVideoPage = new CameraVideoPageController(
+        cameraVideoPageInitialised);
 
 // You may need to create variables to store state.
     
@@ -32,12 +34,9 @@ var cameraVideoPage = new CameraVideoPageController(cameraVideoPageInitialised);
     function cameraVideoPageInitialised(event)
 {
     // Step 1: Check for and intialise deviceMotion
-	 alph = event.alpha;
-     bet = event.beta;
-     gam = event.gamma;
-	axisX = alph.toFixed(2);
-	axisY = bet.toFixed(2);
-	axisZ = gam.toFixed(2);
+	 axisX = event.alpha;
+     axisY = event.beta;
+     axisZ = event.gamma;
 	 absolute = event.absolute;
 
    cameraVideoPage.setHeadsUpDisplayHTML("alpha :" + axisX + "\n" + "<br />"+"beta :" + axisY + "\n" + "<br />"+"gamma :" + axisZ + "\n" + "<br />"+"absolute :" + absolute + "\n" + "<br />");
@@ -45,7 +44,8 @@ var cameraVideoPage = new CameraVideoPageController(cameraVideoPageInitialised);
 }
 window.addEventListener('deviceorientation',cameraVideoPageInitialised);
 
-    
+//======================================================================================
+var cameraHeight = new setCameraHeightValue();
 // This function is called by a button to set the height of phone from the
 // ground, in metres.
 function setCameraHeightValue()
@@ -80,12 +80,17 @@ function setBaseTiltAngle()
     var convertRadian1 = BaseTiltAngle * Math.PI / 180;
     // calculate distance to the object
     distance = Math.tan(convertRadian1) * userInputHeight;
-    //return convertRadian1;
-    cameraVideoPage.setHeadsUpDisplayHTML("Estimated Distance : " + distance + "m");
-    return BaseTiltAngle;
+    cameraVideoPage.displayMessage("Estimated Distance :" + distance + "m",3000)
+    return distance;
+   
+     
 }
 
 //console.log(BaseTiltAngle)
+
+
+
+
 
 // This function is called by a button to set the angle to the apex of
 // the object being measured.  It uses the current smoothed tilt angle.
@@ -98,17 +103,12 @@ function setApexTiltAngle()
     cameraVideoPage.displayMessage("Apex Tilt Angle recorded:" + actualApexAngle, 2000)
      // convert from degree to radian
         var convertRadian2 = actualApexAngle * Math.PI / 180;
-	    var convertRadian1 = BaseTiltAngle * Math.PI / 180;
-		distance = Math.tan(convertRadian1) * userInputHeight;
         // calculate the height difference
-        var partialHeight = Math.tan(convertRadian2) * distance;
-        var bottomHeight = Math.tan(convertRadian1) * distance;
-        var totalHeight =  partialHeight + bottomHeight;
+        partialHeight = Math.tan(convertRadian2) * distance;
+        totalHeight =  partialHeight + userInputHeight;
+     cameraVideoPage.displayMessage("Total Height :" + totalHeight + "m",3000)
+    return totalHeight;
         
-   cameraVideoPage.setHeadsUpDisplayHTML("Estimated Height :" + totalHeight + "m");
 }
 
 // You may need to write several other functions.
-   
-
- 
