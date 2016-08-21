@@ -1,0 +1,131 @@
+// The CameraVideoPageController is a class that controls the camera 
+// video page.  This class provides a some useful methods you will
+// need to call:
+//     cameraVideoPage.displayMessage(message, timeout):
+//         Causes a short message string to be displayed on the
+//         page for a brief period.  Useful for showing quick
+//         notifications to the user.  message is a plain string.
+//         timeout is option and denotes the length of time in msec
+//         to show the message for.
+//     cameraVideoPage.setHeadsUpDisplayHTML(html):
+//         This will set or update the heads-up-display with the
+//         text given in the html argument.  Usually this should 
+//         just be a string with text and line breaks (<br />).
+
+ // Given an HTML element class and a boolean representing
+    // whether those elements should be displayed, this function
+    // hides/shows all elements with that class.
+    // ======================================================================
+    //   Orientation/compass sensor code (deviceOrientation)
+    // ======================================================================    
+
+
+// Initialise the camera video page and callback to our 
+// cameraVideoPageInitialised() function when ready.
+var axisX, axisY, axisZ, absoulute, userInputHeight = "" , BaseTiltAngle = "", ApexTlitAngle = "", distance = "", partialHeight = "", totalHeight="";
+
+var cameraVideoPage = new CameraVideoPageController(
+        cameraVideoPageInitialised);
+
+// You may need to create variables to store state.
+    
+// This function will be called when the camera video page
+// is intialised and ready to be used.
+    function cameraVideoPageInitialised(event)
+{
+    // Step 1: Check for and intialise deviceMotion
+	 axisX = event.alpha;
+     axisY = event.beta;
+     axisZ = event.gamma;
+	 absolute = event.absolute;
+
+   cameraVideoPage.setHeadsUpDisplayHTML("alpha :" + axisX + "\n" + "<br />"+"beta :" + axisY + "\n" + "<br />"+"gamma :" + axisZ + "\n" + "<br />"+"absolute :" + absolute + "\n" + "<br />");
+    
+}
+window.addEventListener('deviceorientation',cameraVideoPageInitialised);
+
+//======================================================================================
+var cameraHeight = new setCameraHeightValue();
+// This function is called by a button to set the height of phone from the
+// ground, in metres.
+function setCameraHeightValue()
+{
+    // Step 3: Set camera height
+    // check if input is a number and is positive
+    // display on screen using the displayMessage method
+    userInputHeight = prompt("Please enter your estimated camera height in the unit of metre");
+    if (userInputHeight != null)
+        {
+    while (isNaN(userInputHeight) || userInputHeight <=0 )
+        {
+            alert("Your entry is not a not number or it is a negative value");
+            userInputHeight = prompt("Please enter your estimated camera height");
+        }
+        }
+cameraVideoPage.displayMessage("Estimated Camera height recorded : " + userInputHeight + "m", 2000)
+return userInputHeight;
+}
+
+    
+// This function is called by a button to set the angle to the base of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setBaseTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+    BaseTiltAngle = axisY;
+    cameraVideoPage.displayMessage("Base Tilt Angle recorded:" + BaseTiltAngle, 2000)   
+    //return BaseTiltAngle;
+    // convert from degree to radian
+    var convertRadian1 = BaseTiltAngle * Math.PI / 180;
+    // calculate distance to the object
+    distance = Math.tan(convertRadian1) * userInputHeight;
+    cameraVideoPage.displayMessage("Estimated Distance :" + distance + "m",3000)
+    return BaseTiltAngle;
+   
+     
+}
+
+//console.log(BaseTiltAngle)
+
+
+
+
+
+// This function is called by a button to set the angle to the apex of
+// the object being measured.  It uses the current smoothed tilt angle.
+function setApexTiltAngle()
+{
+    // Step 4: Record tilt angle 
+    // display on screen using the displayMessage method
+    ApexTiltAngle = axisY;
+	if (ApexTiltAngle > 90)
+	{
+    var actualApexAngle = ApexTiltAngle - 90;
+    cameraVideoPage.displayMessage("Apex Tilt Angle recorded:" + actualApexAngle, 2000)
+     // convert from degree to radian
+        var convertRadian2 = actualApexAngle * Math.PI / 180;
+        // calculate the height difference
+		var convertRadian3 = BaseTiltAngle * Math.PI / 180;
+    // calculate distance to the object
+        distance = Math.tan(convertRadian3) * userInputHeight;
+        partialHeight = Math.tan(convertRadian2) * distance;
+        totalHeight =  partialHeight + userInputHeight;
+     cameraVideoPage.displayMessage("Total Height :" + totalHeight + "m",3000)
+	}
+	else if (ApexTiltAngle < 90)
+	{	
+	cameraVideoPage.displayMessage("Apex Tilt Angle recorded:" + ApexTiltAngle, 2000)
+	    var convertRadian2 = ApexTiltAngle * Math.PI / 180;
+		var convertRadian3 = BaseTiltAngle * Math.PI / 180;
+    // calculate distance to the object
+        distance = Math.tan(convertRadian3) * userInputHeight;
+		partialHeight = distance / Math.tan(convertRadian2);
+		totalHeight = userInputHeight - partialHeight;
+	cameraVideoPage.displayMessage("Total Height :" + totalHeight + "m",3000) 
+	} 
+	return totalHeight;
+        
+}
+
+// You may need to write several other functions.
