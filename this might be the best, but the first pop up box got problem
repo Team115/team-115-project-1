@@ -60,8 +60,12 @@ function setCameraHeightValue()
             alert("Your entry is not a not number or it is a negative value");
             userInputHeight = prompt("Please enter your estimated camera height");
         }
-        }
-cameraVideoPage.displayMessage("Estimated Camera height recorded : " + userInputHeight + "m", 2000)
+    cameraVideoPage.displayMessage("Estimated Camera height recorded : " + userInputHeight + "m", 2000)
+		}
+	else
+	{
+	cameraVideoPage.displayMessage("No Estimated Camera height recorded", 2000)
+	}
 return userInputHeight;
 }
 
